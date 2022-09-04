@@ -112,7 +112,7 @@ export async function activateCardService(
     //verificar se cartão já foi ativado
     if(card.password){
         throw {
-            type: "error_forbidden",
+            type: "error_bad_request",
             message: "card already active"
         }
     }
@@ -130,7 +130,7 @@ export async function activateCardService(
     //validar se senha possui 4 números, criptografar e persistir senha
     if(password.length !== 4){
         throw {
-            type: "error_forbidden",
+            type: "error_bad_request",
             message: "password must consist of 4 numbers"
         }
     }
@@ -241,7 +241,7 @@ export async function ChangeCardStatus(
 
     else if(action !== "block" && action !== "unblock"){
         throw {
-            type: "error_forbidden",
+            type: "error_bad_request",
             message: "Invalid request"
         }
     }

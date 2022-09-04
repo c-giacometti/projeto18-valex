@@ -20,6 +20,10 @@ export async function createCard(req: Request, res: Response){
         res.status(201).send("card created successfully");
         
     } catch (error){
+        if(error.type === "error_bad_request"){
+            return res.status(400).send(error.message);
+        }
+
         if(error.type === "error_unauthorized"){
             return res.status(401).send(error.message);
         }
@@ -58,6 +62,10 @@ export async function activateCard(req: Request, res: Response){
         res.status(200).send("card activated successfully");
 
     } catch (error){
+        if(error.type === "error_bad_request"){
+            return res.status(400).send(error.message);
+        }
+
         if(error.type === "error_unauthorized"){
             return res.status(401).send(error.message);
         }
@@ -97,6 +105,10 @@ export async function getTransactions(req: Request, res: Response){
         res.status(200).send(transactionsData);
 
     } catch (error){
+        if(error.type === "error_bad_request"){
+            return res.status(400).send(error.message);
+        }
+        
         if(error.type === "error_unauthorized"){
             return res.status(401).send(error.message);
         }
@@ -136,6 +148,10 @@ export async function cardBlock(req: Request, res: Response){
     res.status(200).send("card blocked");
 
     } catch (error){
+        if(error.type === "error_bad_request"){
+            return res.status(400).send(error.message);
+        }
+
         if(error.type === "error_unauthorized"){
             return res.status(401).send(error.message);
         }
@@ -175,6 +191,10 @@ export async function cardUnblock(req: Request, res: Response){
         res.status(200).send("card unblocked");
     
     } catch (error){
+        if(error.type === "error_bad_request"){
+            return res.status(400).send(error.message);
+        }
+
         if(error.type === "error_unauthorized"){
             return res.status(401).send(error.message);
         }

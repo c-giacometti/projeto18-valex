@@ -1,9 +1,7 @@
 import { Response } from "express";
 
 export default function errorHandler(error, _req, res: Response, _next){
-
-    console.log(error)
-
+    
     if(error.type === "error_unauthorized"){
         return res.status(401).send(error.message);
     }
