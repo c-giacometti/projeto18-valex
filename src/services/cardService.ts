@@ -7,6 +7,8 @@ import bcrypt from "bcrypt";
 import * as companyRepository from "../repositories/companyRepository.js";
 import * as employeeRepository from "../repositories/employeeRepository.js";
 import * as cardRepository from "../repositories/cardRepository.js";
+import * as paymentRepository from "../repositories/paymentRepository.js";
+import * as rechargeRepository from "../repositories/rechargeRepository.js";
 
 dayjs.extend(customParseFormat);
 
@@ -27,7 +29,6 @@ export async function createCardService(
     }
 
     //verificar se o empregado é cadastrado
-
     const employee = await employeeRepository.findById(employeeId);
 
     if(!employee){
@@ -139,6 +140,55 @@ export async function activateCardService(
     //update da senha
     await cardRepository.update(cardId, { password: passwordHash });
     
+}
+
+export async function getTransactionsService(
+    employeeId: number,
+    cardId: number
+) {
+
+    //verificar se cartão é cadastrado
+    const card = await cardRepository.findById(cardId);
+
+    if(!card){
+        throw {
+            type: "error_not_found",
+            message: "card not found"
+        }
+    }
+
+    //verificar se cartão é do funcionário
+    if(card.employeeId !== employeeId){
+        throw {
+            type: "error_unauthorized",
+            message: "unauthorized user"
+        }
+    }
+
+    //obter recargas
+    const recharges = await rechargeRepository.findByCardId(cardId);
+    let rechargeValues = 0;
+    if(recharges.length > 0){
+        recharges.map((recharge) => rechargeValues += recharge.amount);
+    }
+
+    //obter compras
+    const purchases = await paymentRepository.findByCardId(cardId);
+    let purchaseValues = 0;
+    if(purchases.length > 0){
+        purchases.map((purchase) => purchaseValues += purchase.amount);
+    }
+
+    //retornar saldo e transações
+    const balance = rechargeValues - purchaseValues;
+    const transactionsData = {
+        balance,
+        "transactions": purchases,
+        "recharges": recharges
+    }
+
+    return transactionsData;
+
 }
 
 export async function ChangeCardStatus(

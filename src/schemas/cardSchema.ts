@@ -20,6 +20,11 @@ const activateCardSchema = joi.object({
         .required()
 });
 
+const getTransactionsSchema = joi.object({
+    employeeId: joi.number().required(),
+    cardId: joi.number().required()
+})
+
 const changeStatusSchema = joi.object({
     cardId: joi.number().required(),
     employeeId: joi.number().required(),
@@ -29,4 +34,4 @@ const changeStatusSchema = joi.object({
         .required()
 })
 
-export { createCardSchema, activateCardSchema, changeStatusSchema };
+export { createCardSchema, activateCardSchema, getTransactionsSchema, changeStatusSchema };
