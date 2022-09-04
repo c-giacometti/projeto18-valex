@@ -42,7 +42,7 @@ export async function createCardService(
 
     if(cardExists){
         throw {
-            type: "error_conflit",
+            type: "error_conflict",
             message: "card already exists"
         }
     }
@@ -57,8 +57,6 @@ export async function createCardService(
     const lastName = otherNames.pop();
     const middleNames = otherNames.filter((name) => name.length >= 3).map(n => n[0]);
     const cardholderName = [firstName, ...middleNames, lastName].join(" ").toUpperCase();
-
-    console.log(lastName, middleNames, firstName)
 
     //gerar data de validade
     const expirationDate = dayjs().add(5, "years").format("MM/YY");
@@ -138,6 +136,83 @@ export async function activateCardService(
 
     const passwordHash = bcrypt.hashSync(password, 10);
 
+    //update da senha
     await cardRepository.update(cardId, { password: passwordHash });
     
+}
+
+export async function ChangeCardStatus(
+    action: string,
+    cardId: number,
+    employeeId: number,
+    password: string
+){
+
+    //verificar se cartão é cadastrado
+    const card = await cardRepository.findById(cardId);
+
+    if(!card){
+        throw {
+            type: "error_not_found",
+            message: "card not found"
+        }
+    }
+
+    //verificar se cartão é do funcionário
+    if(card.employeeId !== employeeId){
+        throw {
+            type: "error_unauthorized",
+            message: "unauthorized user"
+        }
+    }
+
+    //verificar se cartão não expirou
+    if (!dayjs().isBefore(dayjs(card.expirationDate, 'MM/YY'), 'month')) {
+        throw {
+            type: "error_forbidden",
+            message: "card expired"
+        }
+    }
+
+    //verificar ação e status (bloq/desbloq)
+    if(action === "block" && card.isBlocked === true){
+        throw {
+            type: "error_conflict",
+            message: "card already blocked"
+        }
+    }
+
+    else if(action === "unblock" && card.isBlocked === false){
+        throw {
+            type: "error_conflict",
+            message: "card already unblocked"
+        }
+    }
+
+    else if(action !== "block" && action !== "unblock"){
+        throw {
+            type: "error_forbidden",
+            message: "Invalid request"
+        }
+    }
+
+    //verificar senha
+    const validPassword = bcrypt.compareSync(password,card.password);
+
+    if(!validPassword){
+        throw {
+            type: "error_forbidden",
+            message: "wrong data"
+        }
+    }
+
+    //mudar status
+    if(action === "block"){
+        await cardRepository.update(cardId, { isBlocked: true });
+    } 
+    
+    if(action === "unblock"){
+        await cardRepository.update(cardId, {isBlocked: false});
+    }
+
 }

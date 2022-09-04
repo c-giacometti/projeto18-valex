@@ -20,4 +20,13 @@ const activateCardSchema = joi.object({
         .required()
 });
 
-export { createCardSchema, activateCardSchema };
+const changeStatusSchema = joi.object({
+    cardId: joi.number().required(),
+    employeeId: joi.number().required(),
+    password: joi.string()
+        .regex(/^[0-9]*$/)
+        .length(4)
+        .required()
+})
+
+export { createCardSchema, activateCardSchema, changeStatusSchema };

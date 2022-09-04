@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { activateCardSchema, createCardSchema } from "../schemas/cardSchema.js";
+import { activateCardSchema, changeStatusSchema, createCardSchema } from "../schemas/cardSchema.js";
 import * as cardService from "../services/cardService.js";
 
 export async function createCard(req: Request, res: Response){
@@ -28,8 +28,8 @@ export async function createCard(req: Request, res: Response){
             return res.status(404).send(error.message);
         }
     
-        if(error.type === "error_conflit"){
-            return res.status(402).send(error.message);
+        if(error.type === "error_conflict"){
+            return res.status(409).send(error.message);
         }
 
         if(error.type === "error_forbidden"){
@@ -55,7 +55,7 @@ export async function activateCard(req: Request, res: Response){
 
         await cardService.activateCardService(employeeId, cardId, CVV, password);
     
-        res.status(201).send("card activated successfully");
+        res.status(200).send("card activated successfully");
 
     } catch (error){
         if(error.type === "error_unauthorized"){
@@ -66,8 +66,8 @@ export async function activateCard(req: Request, res: Response){
             return res.status(404).send(error.message);
         }
     
-        if(error.type === "error_conflit"){
-            return res.status(402).send(error.message);
+        if(error.type === "error_conflict"){
+            return res.status(409).send(error.message);
         }
 
         if(error.type === "error_forbidden"){
@@ -78,4 +78,88 @@ export async function activateCard(req: Request, res: Response){
     
     }
     
+}
+
+export async function getTransactions(req: Request, res: Response){
+
+
+
+}
+
+export async function cardBlock(req: Request, res: Response){
+
+    try {
+
+    const { cardId, employeeId, password } = req.body;
+
+    const validRequest = changeStatusSchema.validate(req.body);
+
+    if(validRequest.error){
+        return res.status(422).send("invalid data format");
+    }
+
+    await cardService.ChangeCardStatus("block", cardId, employeeId, password);
+
+    res.status(200).send("card blocked");
+
+    } catch (error){
+        if(error.type === "error_unauthorized"){
+            return res.status(401).send(error.message);
+        }
+    
+        if(error.type === "error_not_found"){
+            return res.status(404).send(error.message);
+        }
+    
+        if(error.type === "error_conflict"){
+            return res.status(409).send(error.message);
+        }
+
+        if(error.type === "error_forbidden"){
+            return res.status(403).send(error.message);
+        }
+    
+        return res.status(500).send(error.message);
+    
+    }
+
+}
+
+export async function cardUnblock(req: Request, res: Response){
+
+    try {
+
+        const { cardId, employeeId, password } = req.body;
+    
+        const validRequest = changeStatusSchema.validate(req.body);
+    
+        if(validRequest.error){
+            return res.status(422).send("invalid data format");
+        }
+    
+        await cardService.ChangeCardStatus("unblock", cardId, employeeId, password);
+    
+        res.status(200).send("card unblocked");
+    
+    } catch (error){
+        if(error.type === "error_unauthorized"){
+            return res.status(401).send(error.message);
+        }
+        
+        if(error.type === "error_not_found"){
+            return res.status(404).send(error.message);
+        }
+        
+        if(error.type === "error_conflict"){
+            return res.status(409).send(error.message);
+        }
+    
+        if(error.type === "error_forbidden"){
+            return res.status(403).send(error.message);
+        }
+        
+        return res.status(500).send(error.message);
+        
+    }
+
 }
